@@ -7,7 +7,8 @@ subplot(1,2,1);
 plot(Gy);
 xlabel('frequency samples');
 title('PSD');
-subplot(1 ,2 ,2);
+subplot(1,2,2);
 plot(Ry);
 xlabel('time shift');
+
 title('Autocorrelation');
