@@ -1,0 +1,145 @@
+clc;
+clear all;
+
+type = input('Enter the type of channel (NFC / EFC / NC / BSC): ', 's');
+
+switch type
+    case 'NFC'
+        m = input('Enter the no. of messages = ');     %2%
+        n = m;
+        p = zeros(m, n);
+        for i = 1:m
+            for j = 1:n
+                p(i,j) = input('Enter the joint probability: ');      %0.1;0.2;0.3;0.4%
+            end
+        end
+        disp('Joint Probability Matrix P = ');
+        disp(p);
+
+        pX = sum(p, 2)'; % row-wise sum
+        pY = sum(p, 1);  % col-wise sum
+
+        HX  = entropy(pX);
+        HY  = entropy(pY);
+        HXY = HX; % for NFC channel
+
+        HXbyY = HXY - HY;
+        HYbyX = HXY - HX;
+        IXY   = HX + HY - HXY;
+
+        disp(['HX = ' num2str(HX)]);
+        disp(['HY = ' num2str(HY)]);
+        disp(['HXY = ' num2str(HXY)]);
+        disp(['HX|Y = ' num2str(HXbyY)]);
+        disp(['HY|X = ' num2str(HYbyX)]);
+        disp(['I(X;Y) = ' num2str(IXY)]);
+
+    case 'EFC'
+        m = input('Enter the no. of messages = ');
+        n = 3*m;
+        p = zeros(m, n);
+        for i = 1:m
+            for j = 1:n
+                p(i,j) = input('Enter the joint probability: ');
+            end
+        end
+        disp('Joint Probability Matrix P = ');
+        disp(p);
+
+        pX = sum(p, 2)'; 
+        pY = sum(p, 1);  
+
+        HX  = entropy(pX);
+        HY  = entropy(pY);
+        HXY = HY; % for EFC channel
+
+        HXbyY = HXY - HY;
+        HYbyX = HXY - HX;
+        IXY   = HX + HY - HXY;
+
+        disp(['HX = ' num2str(HX)]);
+        disp(['HY = ' num2str(HY)]);
+        disp(['HXY = ' num2str(HXY)]);
+        disp(['HX|Y = ' num2str(HXbyY)]);
+        disp(['HY|X = ' num2str(HYbyX)]);
+        disp(['I(X;Y) = ' num2str(IXY)]);
+
+    case 'NC'
+        m = input('Enter the no. of messages = ');
+        p = zeros(m,m);
+        for i = 1:m
+            for j = 1:m
+                p(i,j) = input('Enter the joint probability: ');
+            end
+        end
+        disp('Joint Probability Matrix P = ');
+        disp(p);
+
+        pX = sum(p, 2)'; 
+        pY = sum(p, 1);  
+
+        HX  = entropy(pX);
+        HY  = entropy(pY);
+        HXY = sum(sum(-p .* log2_safe(p)));
+
+        HXbyY = HXY - HY;
+        HYbyX = HXY - HX;
+        IXY   = HX + HY - HXY;
+        C     = max(IXY);
+
+        disp(['HX = ' num2str(HX)]);
+        disp(['HY = ' num2str(HY)]);
+        disp(['HXY = ' num2str(HXY)]);
+        disp(['HX|Y = ' num2str(HXbyY)]);
+        disp(['HY|X = ' num2str(HYbyX)]);
+        disp(['I(X;Y) = ' num2str(IXY)]);
+        disp(['Capacity C = ' num2str(C)]);
+
+    case 'BSC'
+        m = input('Enter the no. of input messages = ');
+        n = input('Enter the no. of output messages = ');
+        pYbyX = zeros(m,n);
+        for i = 1:m
+            for j = 1:n
+                pYbyX(i,j) = input('Enter the conditional probability: ');
+            end
+        end
+        disp('Conditional Probability Matrix P(Y|X) = ');
+        disp(pYbyX);
+
+        pX = zeros(1,m);
+        for i = 1:m
+            pX(i) = input('Enter the input probability: ');
+        end
+
+        pXY = pYbyX .* pX';
+        pY  = sum(pXY, 1);
+
+        HX  = entropy(pX);
+        HY  = entropy(pY);
+        HXY = sum(sum(-pXY .* log2_safe(pXY)));
+
+        HXbyY = HXY - HY;
+        HYbyX = HXY - HX;
+        IXY   = HX + HY - HXY;
+
+        disp(['HX = ' num2str(HX)]);
+        disp(['HY = ' num2str(HY)]);
+        disp(['HXY = ' num2str(HXY)]);
+        disp(['HX|Y = ' num2str(HXbyY)]);
+        disp(['HY|X = ' num2str(HYbyX)]);
+        disp(['I(X;Y) = ' num2str(IXY)]);
+end
+
+
+%% ===== Helper Functions =====
+function H = entropy(p)
+    p = p(p > 0); % remove zeros to avoid log2(0)
+    H = -sum(p .* log2(p));
+end
+
+function val = log2_safe(x)
+    val = zeros(size(x));
+    idx = x > 0;
+    val(idx) = log2(x(idx));
+end
